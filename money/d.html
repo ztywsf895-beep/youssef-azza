@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الحضور والانصراف - Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --success-light: #34d399;
+            --danger: #ef4444;
+            --danger-light: #f87171;
+            --warning: #f59e0b;
+            --warning-light: #fbbf24;
+            --info: #0ea5e9;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+        }
+
+        .app-container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .header-content { position: relative; z-index: 1; }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-title h1 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-title p {
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-header {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-header:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* ===== STATS CARDS ===== */
+        .stats-section { margin-bottom: 28px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            padding: 24px 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+        }
+        .stat-card .stat-bg-icon {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-size: 5rem;
+            opacity: 0.04;
+            transform: rotate(-15deg);
+        }
+        .stat-card .stat-icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 14px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover .stat-icon-wrap { transform: scale(1.1) rotate(5deg); }
+        .stat-card.total .stat-icon-wrap { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
+        .stat-card.present .stat-icon-wrap { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+        .stat-card.absent .stat-icon-wrap { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+        .stat-card.late .stat-icon-wrap { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-card .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .stat-card .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 8px;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+        }
+        .stat-card .trend-up { background: #d1fae5; color: #065f46; }
+        .stat-card .trend-down { background: #fee2e2; color: #991b1b; }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-section {
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow);
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .progress-header h3 {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 700;
+        }
+        .progress-header .progress-percent {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            background: linear-gradient(90deg, var(--success), var(--success-light));
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            border-radius: var(--radius-full);
+        }
+        .progress-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ===== CATEGORIES ===== */
+        .categories-section { margin-bottom: 28px; }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .section-title {
+            font-size: 1.15rem;
+            color: var(--text);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .title-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .category-card {
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--cat-color, var(--primary));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .category-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--cat-color, var(--primary));
+        }
+        .category-card:hover::before { opacity: 1; }
+
+        .cat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .cat-info { display: flex; align-items: center; gap: 12px; }
+        .cat-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            background: var(--cat-bg, #e0e7ff);
+            transition: transform 0.3s;
+        }
+        .category-card:hover .cat-icon-wrap { transform: scale(1.1) rotate(-5deg); }
+        .cat-name {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 1.05rem;
+        }
+        .cat-count {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .cat-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .category-card:hover .cat-arrow {
+            background: var(--cat-color, var(--primary));
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        .cat-stats-bar {
+            display: flex;
+            height: 6px;
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: 12px;
+            background: #f1f5f9;
+        }
+        .cat-stat-seg {
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+        .cat-stat-seg.present { background: var(--success); }
+        .cat-stat-seg.late { background: var(--warning); }
+        .cat-stat-seg.absent { background: var(--danger); }
+
+        .cat-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cat-stat-pills {
+            display: flex;
+            gap: 8px;
+        }
+        .cat-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+        }
+        .cat-pill.present { background: #d1fae5; color: #065f46; }
+        .cat-pill.late { background: #fef3c7; color: #92400e; }
+        .cat-pill.absent { background: #fee2e2; color: #991b1b; }
+
+        /* ===== EMPLOYEES TABLE ===== */
+        .employees-section {
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+        }
+        .employees-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .employees-header h2 {
+            color: var(--text);
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-input-wrap {
+            position: relative;
+        }
+        .search-input-wrap input {
+            padding: 10px 14px 10px 40px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            outline: none;
+            width: 240px;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+            background: var(--bg);
+        }
+        .search-input-wrap input:focus {
+            border-color: var(--primary);
+            background: var(--card);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        .search-input-wrap .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Cairo', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99,102,241,0.45);
+        }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-ghost {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-light);
+        }
+        .btn-ghost:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(99,102,241,0.05);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 2px;
+        }
+        .filter-tab {
+            background: none;
+            border: none;
+            padding: 8px 18px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            transition: all 0.2s;
+            position: relative;
+            font-weight: 500;
+        }
+        .filter-tab.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        .filter-tab:hover { color: var(--text); }
+
+        .employees-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .employees-table th {
+            text-align: right;
+            padding: 14px 16px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .employees-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .employees-table tbody tr {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .employees-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        .employee-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+            flex-shrink: 0;
+        }
+        .employee-name { font-weight: 600; }
+        .employee-id {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .status-badge {
+            padding: 5px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-present { background: #d1fae5; color: #065f46; }
+        .status-absent { background: #fee2e2; color: #991b1b; }
+        .status-late { background: #fef3c7; color: #92400e; }
+        .status-pending { background: #f1f5f9; color: #64748b; }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-present .status-dot { background: var(--success); }
+        .status-absent .status-dot { background: var(--danger); }
+        .status-late .status-dot { background: var(--warning); }
+
+        .action-btns { display: flex; gap: 6px; }
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+        .action-btn.present { color: var(--success); }
+        .action-btn.absent { color: var(--danger); }
+        .action-btn.late { color: var(--warning); }
+        .action-btn:hover {
+            transform: scale(1.15);
+            box-shadow: var(--shadow);
+        }
+        .action-btn.present:hover { background: var(--success); color: white; border-color: var(--success); }
+        .action-btn.absent:hover { background: var(--danger); color: white; border-color: var(--danger); }
+        .action-btn.late:hover { background: var(--warning); color: white; border-color: var(--warning); }
+
+        .time-cell {
+            font-family: 'Cairo', monospace;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        .dept-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #e0e7ff;
+            color: var(--primary-dark);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius-xl);
+            padding: 0;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-xl);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.85) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            color: var(--text);
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .close-btn {
+            background: var(--bg);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            font-size: 1.3rem;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #fee2e2;
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+        .modal-body { padding: 24px 28px; overflow-y: auto; max-height: 60vh; }
+        .modal-footer { padding: 16px 28px; border-top: 1px solid var(--border); }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .modal-stat {
+            text-align: center;
+            padding: 18px 12px;
+            border-radius: var(--radius);
+            transition: transform 0.2s;
+        }
+        .modal-stat:hover { transform: translateY(-3px); }
+        .modal-stat.present { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+        .modal-stat.absent { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+        .modal-stat.late { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .modal-stat .num { font-size: 1.6rem; font-weight: 800; }
+        .modal-stat .lbl { font-size: 0.8rem; color: var(--text-light); font-weight: 600; margin-top: 4px; }
+
+        .employee-list-modal { }
+        .emp-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .emp-item:hover {
+            background: var(--bg);
+            border-color: var(--border);
+        }
+        .emp-info { display: flex; align-items: center; gap: 12px; }
+        .emp-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .emp-name { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+        .emp-time { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* ===== FORM ===== */
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            outline: none;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+            background: var(--bg);
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            background: var(--card);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+        .toast {
+            background: var(--text);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+            justify-content: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .toast-icon { font-size: 1.2rem; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-light);
+        }
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h3 { font-size: 1.1rem; margin-bottom: 6px; color: var(--text); }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.5s ease forwards; }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .categories-grid { grid-template-columns: 1fr; }
+            .search-input-wrap input { width: 160px; }
+            .employees-table { font-size: 0.8rem; }
+            .employees-table th, .employees-table td { padding: 10px 8px; }
+            .header-title h1 { font-size: 1.4rem; }
+            .modal-stats { grid-template-columns: 1fr; }
+            .action-btns { gap: 3px; }
+            .action-btn { width: 30px; height: 30px; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header animate-in">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="header-title">
+                        <h1>📋 نظام الحضور والانصراف</h1>
+                        <p>إدارة حضور الموظفين بكفاءة واحترافية عالية</p>
+                    </div>
+                    <div class="header-actions">
+                        <div class="date-badge" id="currentDate"></div>
+                        <button class="btn-header" onclick="showAddModal()">➕ موظف جديد</button>
+                        <button class="btn-header" onclick="exportData()">📥 تصدير</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-section animate-in" style="animation-delay:0.1s">
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-bg-icon">👥</div>
+                    <div class="stat-icon-wrap">👥</div>
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">إجمالي الموظفين</div>
+                    <div class="stat-trend trend-up">↑ 100%</div>
+                </div>
+                <div class="stat-card present">
+                    <div class="stat-bg-icon">✅</div>
+                    <div class="stat-icon-wrap">✅</div>
+                    <div class="stat-number" id="presentCount">0</div>
+                    <div class="stat-label">حاضرون</div>
+                    <div class="stat-trend trend-up" id="presentTrend">↑ 0%</div>
+                </div>
+                <div class="stat-card absent">
+                    <div class="stat-bg-icon">❌</div>
+                    <div class="stat-icon-wrap">❌</div>
+                    <div class="stat-number" id="absentCount">0</div>
+                    <div class="stat-label">غائبون</div>
+                    <div class="stat-trend trend-down" id="absentTrend">↓ 0%</div>
+                </div>
+                <div class="stat-card late">
+                    <div class="stat-bg-icon">⏰</div>
+                    <div class="stat-icon-wrap">⏰</div>
+                    <div class="stat-number" id="lateCount">0</div>
+                    <div class="stat-label">متأخرون</div>
+                    <div class="stat-trend trend-down" id="lateTrend">↓ 0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section animate-in" style="animation-delay:0.15s">
+            <div class="progress-header">
+                <h3>📊 نسبة الحضور اليوم</h3>
+                <div class="progress-percent" id="attendancePercent">0%</div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="progress-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> حاضر</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div> متأخر</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div> غائب</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#e2e8f0"></div> لم يُسجل</div>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="categories-section animate-in" style="animation-delay:0.2s">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="title-icon">📁</div>
+                    الفئات والأقسام
+                </div>
+            </div>
+            <div class="categories-grid" id="categoriesGrid"></div>
+        </div>
+
+        <!-- Employees Section -->
+        <div class="employees-section animate-in" style="animation-delay:0.25s">
+            <div class="employees-header">
+                <h2 id="sectionTitle">👤 قائمة الموظفين</h2>
+                <div class="search-box">
+                    <div class="search-input-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="البحث عن موظف..." oninput="filterEmployees()">
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddModal()">➕ إضافة</button>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="setFilter('all', this)">الكل</button>
+                <button class="filter-tab" onclick="setFilter('present', this)">حاضرون</button>
+                <button class="filter-tab" onclick="setFilter('absent', this)">غائبون</button>
+                <button class="filter-tab" onclick="setFilter('late', this)">متأخرون</button>
+                <button class="filter-tab" onclick="setFilter('pending', this)">لم يُسجل</button>
+            </div>
+
+            <div id="employeesTableContainer">
+                <table class="employees-table">
+                    <thead>
+                        <tr>
+                            <th style="width:140px">الإجراءات</th>
+                            <th style="width:100px">الحالة</th>
+                            <th style="width:100px">الوقت</th>
+                            <th style="width:120px">القسم</th>
+                            <th>الموظف</th>
+                            <th style="width:50px">#</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('categoryModal')">×</button>
+                <h2 id="modalTitle">📊 نتائج الفئة</h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stats" id="modalStats"></div>
+                <div class="employee-list-modal" id="modalEmployeeList"></div>
+            </div>
+            <div class="modal-footer" style="text-align:center">
+                <button class="btn btn-ghost" onclick="closeModal('categoryModal')">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('addModal')">×</button>
+                <h2>➕ إضافة موظف جديد</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>👤 الاسم الكامل</label>
+                    <input type="text" id="newEmpName" placeholder="أدخل اسم الموظف بالكامل">
+                </div>
+                <div class="form-group">
+                    <label>📁 القسم / الفئة</label>
+                    <select id="newEmpCategory">
+                        <option value="الإدارة">🏢 الإدارة</option>
+                        <option value="المبيعات">💼 المبيعات</option>
+                        <option value="التسويق">📢 التسويق</option>
+                        <option value="المالية">💰 المالية</option>
+                        <option value="الموارد البشرية">👥 الموارد البشرية</option>
+                        <option value="التقنية">💻 التقنية</option>
+                        <option value="العمليات">⚙️ العمليات</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🆔 رقم الموظف (اختياري)</label>
+                    <input type="text" id="newEmpId" placeholder="مثال: EMP-001">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" style="width:100%" onclick="addEmployee()">💾 حفظ الموظف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('exportModal')">×</button>
+                <h2>📥 تصدير البيانات</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>📄 نسخ البيانات كـ JSON</label>
+                    <textarea id="exportArea" style="width:100%;height:200px;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:monospace;font-size:0.8rem;direction:ltr;resize:none;" readonly></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex;gap:10px">
+                <button class="btn btn-ghost" style="flex:1" onclick="closeModal('exportModal')">إغلاق</button>
+                <button class="btn btn-primary" style="flex:1" onclick="copyExport()">📋 نسخ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ===== DATA =====
+        let employees = [
+            { id: 1, name: "أحمد محمد علي", empId: "EMP-001", category: "الإدارة", status: "present", time: "08:15 ص", avatar: "أم" },
+            { id: 2, name: "سارة أحمد حسن", empId: "EMP-002", category: "المبيعات", status: "present", time: "08:30 ص", avatar: "سأ" },
+            { id: 3, name: "خالد عبدالله سعيد", empId: "EMP-003", category: "التقنية", status: "late", time: "09:20 ص", avatar: "خس" },
+            { id: 4, name: "فاطمة عمر محمود", empId: "EMP-004", category: "المالية", status: "absent", time: "—", avatar: "فم" },
+            { id: 5, name: "يوسف إبراهيم كامل", empId: "EMP-005", category: "التسويق", status: "present", time: "08:00 ص", avatar: "يك" },
+            { id: 6, name: "نورا سامي فؤاد", empId: "EMP-006", category: "الموارد البشرية", status: "present", time: "08:45 ص", avatar: "نس" },
+            { id: 7, name: "عمر خالد رشاد", empId: "EMP-007", category: "العمليات", status: "absent", time: "—", avatar: "عر" },
+            { id: 8, name: "ليلى حسن عبدالرحمن", empId: "EMP-008", category: "المبيعات", status: "late", time: "09:45 ص", avatar: "لح" },
+            { id: 9, name: "محمد طارق سالم", empId: "EMP-009", category: "التقنية", status: "present", time: "08:10 ص", avatar: "مت" },
+            { id: 10, name: "ريم فؤاد إبراهيم", empId: "EMP-010", category: "الإدارة", status: "present", time: "08:20 ص", avatar: "رف" },
+            { id: 11, name: "عبدالرحمن وليد ناصر", empId: "EMP-011", category: "المالية", status: "late", time: "09:10 ص", avatar: "عن" },
+            { id: 12, name: "هدى محمود علي", empId: "EMP-012", category: "التسويق", status: "absent", time: "—", avatar: "هم" },
+            { id: 13, name: "محمود سعيد فاروق", empId: "EMP-013", category: "العمليات", status: "present", time: "07:55 ص", avatar: "مس" },
+            { id: 14, name: "آية طارق محمود", empId: "EMP-014", category: "الموارد البشرية", status: "present", time: "08:05 ص", avatar: "أط" },
+            { id: 15, name: "إبراهيم خالد سami", empId: "EMP-015", category: "التقنية", status: "pending", time: "—", avatar: "إس" }
+        ];
+
+        let currentFilter = 'all';
+        let filteredEmployees = [...employees];
+
+        const categories = [
+            { name: "الإدارة", icon: "🏢", color: "#6366f1", bg: "#e0e7ff" },
+            { name: "المبيعات", icon: "💼", color: "#10b981", bg: "#d1fae5" },
+            { name: "التسويق", icon: "📢", color: "#f59e0b", bg: "#fef3c7" },
+            { name: "المالية", icon: "💰", color: "#8b5cf6", bg: "#ede9fe" },
+            { name: "الموارد البشرية", icon: "👥", color: "#ec4899", bg: "#fce7f3" },
+            { name: "التقنية", icon: "💻", color: "#06b6d4", bg: "#cffafe" },
+            { name: "العمليات", icon: "⚙️", color: "#f97316", bg: "#ffedd5" }
+        ];
+
+        // ===== INIT =====
+        function init() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('ar-SA', options);
+            renderCategories();
+            renderEmployees();
+            updateStats();
+            setTimeout(() => {
+                updateProgressBar();
+            }, 500);
+        }
+
+        // ===== STATS =====
+        function updateStats() {
+            const total = employees.length;
+            const present = employees.filter(e => e.status === 'present').length;
+            const absent = employees.filter(e => e.status === 'absent').length;
+            const late = employees.filter(e => e.status === 'late').length;
+
+            animateNumber('totalCount', total);
+            animateNumber('presentCount', present);
+            animateNumber('absentCount', absent);
+            animateNumber('lateCount', late);
+
+            document.getElementById('presentTrend').textContent = `↑ ${Math.round((present/total)*100)}%`;
+            document.getElementById('absentTrend').textContent = `↓ ${Math.round((absent/total)*100)}%`;
+            document.getElementById('lateTrend').textContent = `↓ ${Math.round((late/total)*100)}%`;
+        }
+
+        function animateNumber(id, target) {
+            const el = document.getElementById(id);
+            const start = parseInt(el.textContent) || 0;
+            const diff = target - start;
+            const duration = 600;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(start + diff * ease);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // ===== PROGRESS BAR =====
+        function updateProgressBar() {
+            const total = employees.length;
+            const present = employees.filter(e => e.status === 'present').length;
+            const late = employees.filter(e => e.status === 'late').length;
+            const absent = employees.filter(e => e.status === 'absent').length;
+            const pending = employees.filter(e => e.status === 'pending').length;
+
+            const attended = present + late;
+            const percent = total > 0 ? Math.round((attended / total) * 100) : 0;
+
+            document.getElementById('attendancePercent').textContent = percent + '%';
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        // ===== CATEGORIES =====
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = '';
+
+            categories.forEach(cat => {
+                const catEmps = employees.filter(e => e.category === cat.name);
+                const present = catEmps.filter(e => e.status === 'present').length;
+                const absent = catEmps.filter(e => e.status === 'absent').length;
+                const late = catEmps.filter(e => e.status === 'late').length;
+                const total = catEmps.length;
+
+                const presentPct = total > 0 ? (present / total) * 100 : 0;
+                const latePct = total > 0 ? (late / total) * 100 : 0;
+                const absentPct = total > 0 ? (absent / total) * 100 : 0;
+
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.style.setProperty('--cat-color', cat.color);
+                card.style.setProperty('--cat-bg', cat.bg);
+                card.innerHTML = `
+                    <div class="cat-header">
+                        <div class="cat-info">
+                            <div class="cat-icon-wrap">${cat.icon}</div>
+                            <div>
+                                <div class="cat-name">${cat.name}</div>
+                                <div class="cat-count">${total} موظف</div>
+                            </div>
+                        </div>
+                        <div class="cat-arrow">←</div>
+                    </div>
+                    <div class="cat-stats-bar">
+                        <div class="cat-stat-seg present" style="width:${presentPct}%"></div>
+                        <div class="cat-stat-seg late" style="width:${latePct}%"></div>
+                        <div class="cat-stat-seg absent" style="width:${absentPct}%"></div>
+                    </div>
+                    <div class="cat-footer">
+                        <div class="cat-stat-pills">
+                            <span class="cat-pill present">✓ ${present}</span>
+                            <span class="cat-pill late">⏰ ${late}</span>
+                            <span class="cat-pill absent">✗ ${absent}</span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => showCategoryResults(cat);
+                grid.appendChild(card);
+            });
+        }
+
+        // ===== CATEGORY MODAL =====
+        function showCategoryResults(cat) {
+            const catEmps = employees.filter(e => e.category === cat.name);
+            const present = catEmps.filter(e => e.status === 'present');
+            const absent = catEmps.filter(e => e.status === 'absent');
+            const late = catEmps.filter(e => e.status === 'late');
+
+            document.getElementById('modalTitle').innerHTML = `${cat.icon} نتائج قسم ${cat.name}`;
+
+            document.getElementById('modalStats').innerHTML = `
+                <div class="modal-stat present">
+                    <div class="num" style="color:#065f46">${present.length}</div>
+                    <div class="lbl">حاضرون</div>
+                </div>
+                <div class="modal-stat absent">
+                    <div class="num" style="color:#991b1b">${absent.length}</div>
+                    <div class="lbl">غائبون</div>
+                </div>
+                <div class="modal-stat late">
+                    <div class="num" style="color:#92400e">${late.length}</div>
+                    <div class="lbl">متأخرون</div>
+                </div>
+            `;
+
+            let listHTML = '';
+            if (catEmps.length === 0) {
+                listHTML = '<div class="empty-state"><div class="icon">📭</div><h3>لا يوجد موظفين</h3><p>هذا القسم فارغ حالياً</p></div>';
+            } else {
+                catEmps.forEach(emp => {
+                    const statusClass = `status-${emp.status}`;
+                    const statusText = emp.status === 'present' ? 'حاضر' : emp.status === 'absent' ? 'غائب' : emp.status === 'late' ? 'متأخر' : 'لم يُسجل';
+                    listHTML += `
+                        <div class="emp-item">
+                            <div class="emp-info">
+                                <div class="emp-avatar" style="background:${cat.color}">${emp.avatar}</div>
+                                <div>
+                                    <div class="emp-name">${emp.name}</div>
+                                    <div class="emp-time">${emp.empId} · ${emp.time}</div>
+                                </div>
+                            </div>
+                            <span class="status-badge ${statusClass}"><span class="status-dot"></span> ${statusText}</span>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('modalEmployeeList').innerHTML = listHTML;
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        // ===== EMPLOYEES TABLE =====
+        function renderEmployees() {
+            const tbody = document.getElementById('employeesTableBody');
+            tbody.innerHTML = '';
+
+            let displayList = filteredEmployees;
+            if (currentFilter !== 'all') {
+                displayList = displayList.filter(e => e.status === currentFilter);
+            }
+
+            if (displayList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">🔍</div><h3>لا توجد نتائج</h3><p>جرب تغيير معايير البحث</p></div></td></tr>`;
+                return;
+            }
+
+            displayList.forEach((emp, index) => {
+                const statusClass = `status-${emp.status}`;
+                const statusText = emp.status === 'present' ? 'حاضر' : emp.status === 'absent' ? 'غائب' : emp.status === 'late' ? 'متأخر' : 'لم يُسجل';
+                const row = document.createElement('tr');
+                row.style.animationDelay = (index * 0.03) + 's';
+                row.className = 'animate-in';
+                row.innerHTML = `
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn present" onclick="event.stopPropagation(); setStatus(${emp.id}, 'present')" title="تسجيل حضور">✓</button>
+                            <button class="action-btn absent" onclick="event.stopPropagation(); setStatus(${emp.id}, 'absent')" title="تسجيل غياب">✗</button>
+                            <button class="action-btn late" onclick="event.stopPropagation(); setStatus(${emp.id}, 'late')" title="تسجيل تأخر">⏰</button>
+                        </div>
+                    </td>
+                    <td><span class="status-badge ${statusClass}"><span class="status-dot"></span> ${statusText}</span></td>
+                    <td class="time-cell">${emp.time}</td>
+                    <td><span class="dept-tag">${emp.category}</span></td>
+                    <td>
+                        <div class="employee-cell">
+                            <div>
+                                <div class="employee-name">${emp.name}</div>
+                                <div class="employee-id">${emp.empId}</div>
+                            </div>
+                            <div class="employee-avatar">${emp.avatar}</div>
+                        </div>
+                    </td>
+                    <td style="color:var(--text-muted);font-weight:600">${index + 1}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ===== SET STATUS =====
+        function setStatus(id, status) {
+            const emp = employees.find(e => e.id === id);
+            if (emp) {
+                emp.status = status;
+                emp.time = status === 'absent' ? '—' : new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true });
+                filterEmployees();
+                updateStats();
+                updateProgressBar();
+                renderCategories();
+                const statusText = status === 'present' ? 'حاضر ✅' : status === 'absent' ? 'غائب ❌' : 'متأخر ⏰';
+                showToast(`✅ تم تحديث حالة ${emp.name} إلى ${statusText}`);
+            }
+        }
+
+        // ===== FILTER =====
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            renderEmployees();
+        }
+
+        function filterEmployees() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            filteredEmployees = employees.filter(e =>
+                e.name.toLowerCase().includes(search) ||
+                e.category.includes(search) ||
+                e.empId.toLowerCase().includes(search)
+            );
+            renderEmployees();
+        }
+
+        // ===== ADD EMPLOYEE =====
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('active');
+            setTimeout(() => document.getElementById('newEmpName').focus(), 300);
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('newEmpName').value.trim();
+            const category = document.getElementById('newEmpCategory').value;
+            const empId = document.getElementById('newEmpId').value.trim() || `EMP-${String(employees.length + 1).padStart(3, '0')}`;
+
+            if (!name) {
+                showToast('⚠️ الرجاء إدخال اسم الموظف');
+                return;
+            }
+
+            const names = name.split(' ');
+            const avatar = names.slice(0, 2).map(n => n[0]).join('');
+
+            const newEmp = {
+                id: Date.now(),
+                name: name,
+                empId: empId,
+                category: category,
+                status: 'pending',
+                time: '—',
+                avatar: avatar
+            };
+
+            employees.push(newEmp);
+            filterEmployees();
+            updateStats();
+            updateProgressBar();
+            renderCategories();
+            closeModal('addModal');
+            document.getElementById('newEmpName').value = '';
+            document.getElementById('newEmpId').value = '';
+            showToast(`✅ تم إضافة ${name} بنجاح`);
+        }
+
+        // ===== EXPORT =====
+        function exportData() {
+            const data = {
+                date: new Date().toISOString(),
+                total: employees.length,
+                present: employees.filter(e => e.status === 'present').length,
+                absent: employees.filter(e => e.status === 'absent').length,
+                late: employees.filter(e => e.status === 'late').length,
+                employees: employees
+            };
+            document.getElementById('exportArea').value = JSON.stringify(data, null, 2);
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function copyExport() {
+            const area = document.getElementById('exportArea');
+            area.select();
+            document.execCommand('copy');
+            showToast('📋 تم نسخ البيانات إلى الحافظة');
+        }
+
+        // ===== MODAL =====
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // ===== TOAST =====
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span class="toast-icon">🔔</span><span>${msg}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        // Enter key on add form
+        document.getElementById('newEmpId').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addEmployee();
+        });
+        document.getElementById('newEmpName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('newEmpId').focus();
+        });
+
+        // ===== INIT =====
+        init();
+    </script>
+</body>
+</html>
