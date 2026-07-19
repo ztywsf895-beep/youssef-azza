@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شركة يوسف - حلول رقمية مبتكرة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed; top: 0; width: 100%;
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .logo { font-size: 1.5rem; font-weight: 900; color: #0ea5e9; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a {
+            color: #94a3b8; text-decoration: none;
+            font-weight: 600; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #0ea5e9; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 8rem 5% 4rem;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(14,165,233,0.1) 0%, transparent 50%);
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 800px; }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+        .cta-btn {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            color: white; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(14,165,233,0.3);
+        }
+
+        /* Services Section */
+        .services {
+            padding: 6rem 5%;
+            background: #020617;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem; font-weight: 900;
+            margin-bottom: 3rem;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .service-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(14,165,233,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .service-icon {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
+        }
+        .service-card h3 {
+            font-size: 1.3rem; font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+        .service-card p { color: #94a3b8; line-height: 1.7; }
+
+        /* About Section */
+        .about {
+            padding: 6rem 5%;
+            background: #0f172a;
+        }
+        .about-content {
+            max-width: 1000px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem; align-items: center;
+        }
+        .about-text h2 {
+            font-size: 2.5rem; font-weight: 900;
+            margin-bottom: 1.5rem;
+        }
+        .about-text p {
+            color: #94a3b8; line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .stat-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem; text-align: center;
+        }
+        .stat-box .num {
+            font-size: 2rem; font-weight: 900;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-box .label { color: #94a3b8; font-size: 0.9rem; }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 5%;
+            background: #020617;
+            text-align: center;
+        }
+        .contact-info {
+            display: flex; justify-content: center; gap: 3rem;
+            flex-wrap: wrap; margin-top: 3rem;
+        }
+        .contact-item {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem; min-width: 250px;
+            text-decoration: none;
+            color: #f8fafc;
+            transition: all 0.3s;
+        }
+        .contact-item:hover {
+            transform: translateY(-5px);
+            border-color: #0ea5e9;
+        }
+        .contact-item i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .contact-item h3 { margin-bottom: 0.5rem; }
+        .contact-item p { color: #94a3b8; }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            background: #0f172a;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .about-content { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-cube"></i> شركة يوسف</div>
+        <ul class="nav-links">
+            <li><a href="#home">الرئيسية</a></li>
+            <li><a href="#services">الخدمات</a></li>
+            <li><a href="#about">من نحن</a></li>
+            <li><a href="#contact">تواصل معنا</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>نبني <span>مستقبلك الرقمي</span><br>بإبداع واحترافية</h1>
+            <p>نحن شركة يوسف رائدة في تقديم الحلول الرقمية المبتكرة. نساعدك في تحويل أفكارك إلى واقع رقمي مذهل.</p>
+            <button class="cta-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+                <i class="fas fa-paper-plane"></i> ابدأ معنا
+            </button>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+        <h2 class="section-title">خدماتنا</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
+                <h3>تطوير المواقع</h3>
+                <p>تصميم وتطوير مواقع ويب احترافية متجاوبة مع جميع الأجهزة</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>تطبيقات الجوال</h3>
+                <p>تطوير تطبيقات الهواتف الذكية لنظامي Android و iOS</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
+                <h3>تصميم UI/UX</h3>
+                <p>تصميم واجهات مستخدم جذابة مع تجربة استخدام ممتازة</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-bullhorn"></i></div>
+                <h3>التسويق الرقمي</h3>
+                <p>استراتيجيات تسويق رقمي فعالة لتنمية عملك</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-cloud"></i></div>
+                <h3>حلول السحابة</h3>
+                <p>خدمات استضافة وحلول سحابية آمنة وموثوقة</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>الأمن السيبراني</h3>
+                <p>حماية بياناتك وأنظمتك من التهديدات الإلكترونية</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="about" id="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>من نحن</h2>
+                <p>نحن فريق من المطورين والمصممين المحترفين نسعى لتقديم أفضل الحلول الرقمية لعملائنا. نؤمن بأن التكنولوجيا يجب أن تكون سهلة ومتاحة للجميع.</p>
+                <p>منذ تأسيسنا، عملنا مع أكثر من 100 عميل وساعدناهم في تحقيق أهدافهم الرقمية. نحن نستخدم أحدث التقنيات وأفضل الممارسات لضمان جودة عالية في كل مشروع.</p>
+            </div>
+            <div class="about-stats">
+                <div class="stat-box">
+                    <div class="num">+100</div>
+                    <div class="label">عميل سعيد</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num">+200</div>
+                    <div class="label">مشروع منجز</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num">10+</div>
+                    <div class="label">سنوات خبرة</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num">+15</div>
+                    <div class="label">خبير تقني</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact" id="contact">
+        <h2 class="section-title">تواصل معنا</h2>
+        <p style="color:#94a3b8; max-width:500px; margin:0 auto;">هل لديك مشروع في ذهنك؟ دعنا نتحدث ونحول فكرتك إلى واقع.</p>
+        <div class="contact-info">
+            <a href="tel:01101281161" class="contact-item">
+                <i class="fas fa-phone-alt"></i>
+                <h3>اتصل بنا</h3>
+                <p dir="ltr">011 012 811 61</p>
+            </a>
+            <a href="mailto:"ztywsf895@gmail.com" class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <h3>البريد الإلكتروني</h3>
+                <p>ztywsf895@gmail.com</p>
+            </a>
+            <a href="#" class="contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>الموقع</h3>
+                <p>القاهرة، مصر</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>جميع الحقوق محفوظة 2026 | شركة يوسف</p>
+    </footer>
+</body>
+</html>
