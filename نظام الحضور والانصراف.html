@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الحضور والانصراف</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e3a5f);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 900;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .clock-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 1.5rem 0;
+            direction: ltr;
+        }
+        .date-display {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        .employee-select {
+            margin: 1.5rem 0;
+        }
+        .employee-select select {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15,23,42,0.8);
+            color: #f8fafc;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            min-width: 250px;
+            cursor: pointer;
+        }
+        .employee-select select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+        }
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .btn-check {
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-in {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            box-shadow: 0 10px 30px rgba(34,197,94,0.3);
+        }
+        .btn-in:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(34,197,94,0.4);
+        }
+        .btn-out {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 10px 30px rgba(239,68,68,0.3);
+        }
+        .btn-out:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(239,68,68,0.4);
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-box {
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-box .num {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-box .label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        .records-section {
+            margin-top: 2rem;
+        }
+        .records-section h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .records-table {
+            background: rgba(15,23,42,0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .records-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .records-table th {
+            background: rgba(14,165,233,0.2);
+            padding: 1rem;
+            text-align: right;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .records-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .records-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .status-in {
+            color: #22c55e;
+            font-weight: 700;
+            background: rgba(34,197,94,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        .status-out {
+            color: #ef4444;
+            font-weight: 700;
+            background: rgba(239,68,68,0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        .delete-btn {
+            background: rgba(239,68,68,0.2);
+            color: #ef4444;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.3s;
+        }
+        .delete-btn:hover {
+            background: rgba(239,68,68,0.4);
+        }
+        .export-btn {
+            margin: 1rem auto;
+            display: block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(14,165,233,0.3);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        @media (max-width: 600px) {
+            .clock-display { font-size: 2.5rem; }
+            .header h1 { font-size: 1.8rem; }
+            .btn-check { padding: 0.8rem 2rem; font-size: 1rem; }
+            .records-table { font-size: 0.85rem; }
+            .records-table th, .records-table td { padding: 0.7rem; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clock"></i> نظام الحضور والانصراف</h1>
+            <p>نظام إلكتروني ذكي لإدارة الحضور والانصراف</p>
+            <div class="clock-display" id="clock">00:00:00</div>
+            <div class="date-display" id="date">...</div>
+
+            <div class="employee-select">
+                <select id="employee">
+                    <option value="">اختر الموظف</option>
+                    <option value="أحمد محمد">أحمد محمد</option>
+                    <option value="محمد علي">محمد علي</option>
+                    <option value="خالد محمود">خالد محمود</option>
+                    <option value="عمر أحمد">عمر أحمد</option>
+                    <option value="سامي حسن">سامي حسن</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-check btn-in" onclick="checkIn()">
+                <i class="fas fa-sign-in-alt"></i> تسجيل حضور
+            </button>
+            <button class="btn-check btn-out" onclick="checkOut()">
+                <i class="fas fa-sign-out-alt"></i> تسجيل انصراف
+            </button>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="num" id="totalRecords">0</div>
+                <div class="label">إجمالي السجلات</div>
+            </div>
+            <div class="stat-box">
+                <div class="num" id="todayIn">0</div>
+                <div class="label">حضور اليوم</div>
+            </div>
+            <div class="stat-box">
+                <div class="num" id="todayOut">0</div>
+                <div class="label">انصراف اليوم</div>
+            </div>
+            <div class="stat-box">
+                <div class="num" id="lateCount">0</div>
+                <div class="label">تأخير</div>
+            </div>
+        </div>
+
+        <div class="records-section">
+            <h2><i class="fas fa-list-alt"></i> سجلات الحضور والانصراف</h2>
+            <button class="export-btn" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> تصدير إلى Excel
+            </button>
+            <div class="records-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الموظف</th>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>الحالة</th>
+                            <th>حذف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records">
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>لا توجد سجلات بعد. ابدأ بتسجيل الحضور أو الانصراف.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحديث الساعة
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = 
+                now.toLocaleTimeString('ar-EG', {hour12: false});
+            document.getElementById('date').textContent = 
+                now.toLocaleDateString('ar-EG', {
+                    weekday: 'long', year: 'numeric',
+                    month: 'long', day: 'numeric'
+                });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // تحميل السجلات
+        let records = JSON.parse(localStorage.getItem('attendance_records') || '[]');
+
+        function checkIn() {
+            const employee = document.getElementById('employee').value;
+            if (!employee) {
+                alert('الرجاء اختيار الموظف أولاً');
+                return;
+            }
+            const now = new Date();
+            const hour = now.getHours();
+            const isLate = hour >= 9;
+
+            const record = {
+                id: Date.now(),
+                employee: employee,
+                date: now.toLocaleDateString('ar-EG'),
+                time: now.toLocaleTimeString('ar-EG', {hour12: false}),
+                status: 'حضور',
+                isLate: isLate,
+                timestamp: now.getTime()
+            };
+            records.unshift(record);
+            saveRecords();
+            renderRecords();
+
+            // تأثير نجاح
+            const btn = document.querySelector('.btn-in');
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = '', 200);
+        }
+
+        function checkOut() {
+            const employee = document.getElementById('employee').value;
+            if (!employee) {
+                alert('الرجاء اختيار الموظف أولاً');
+                return;
+            }
+            const now = new Date();
+            const record = {
+                id: Date.now(),
+                employee: employee,
+                date: now.toLocaleDateString('ar-EG'),
+                time: now.toLocaleTimeString('ar-EG', {hour12: false}),
+                status: 'انصراف',
+                isLate: false,
+                timestamp: now.getTime()
+            };
+            records.unshift(record);
+            saveRecords();
+            renderRecords();
+
+            const btn = document.querySelector('.btn-out');
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = '', 200);
+        }
+
+        function deleteRecord(id) {
+            if (confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+                records = records.filter(r => r.id !== id);
+                saveRecords();
+                renderRecords();
+            }
+        }
+
+        function saveRecords() {
+            localStorage.setItem('attendance_records', JSON.stringify(records));
+        }
+
+        function renderRecords() {
+            const tbody = document.getElementById('records');
+            const today = new Date().toLocaleDateString('ar-EG');
+
+            // Update stats
+            document.getElementById('totalRecords').textContent = records.length;
+            document.getElementById('todayIn').textContent = records.filter(r => r.date === today && r.status === 'حضور').length;
+            document.getElementById('todayOut').textContent = records.filter(r => r.date === today && r.status === 'انصراف').length;
+            document.getElementById('lateCount').textContent = records.filter(r => r.isLate).length;
+
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>لا توجد سجلات بعد. ابدأ بتسجيل الحضور أو الانصراف.</p>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map((r, i) => `
+                <tr>
+                    <td>${records.length - i}</td>
+                    <td><strong>${r.employee}</strong></td>
+                    <td>${r.date}</td>
+                    <td dir="ltr">${r.time}</td>
+                    <td><span class="status-${r.status === 'حضور' ? 'in' : 'out'}">${r.status}${r.isLate ? ' (متأخر)' : ''}</span></td>
+                    <td><button class="delete-btn" onclick="deleteRecord(${r.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function exportToExcel() {
+            let csv = '\uFEFFالرقم,الموظف,التاريخ,الوقت,الحالة\n';
+            records.forEach((r, i) => {
+                csv += `${records.length - i},${r.employee},${r.date},${r.time},${r.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'attendance_records.csv';
+            link.click();
+        }
+
+        renderRecords();
+    </script>
+</body>
+</html>
